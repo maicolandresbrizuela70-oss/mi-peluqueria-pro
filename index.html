@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -13,37 +14,51 @@ header h1{margin:0;color:#e7c18b;font-size:25px}
 header p{color:#aaa;margin-bottom:0}
 main{padding:20px;max-width:650px;margin:auto}
 h2{color:#e7c18b}
+h3{color:#e7c18b}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.card{background:#1f2937;padding:18px;border-radius:12px}
+.card{background:#1f2937;padding:18px;border-radius:12px;margin-bottom:10px}
 .card small{color:#aaa}
-.card strong{display:block;font-size:25px;margin-top:10px}
+.card strong{display:block;font-size:23px;margin-top:10px}
 button{background:#c49b63;color:#111827;border:0;padding:13px;border-radius:8px;font-weight:bold;cursor:pointer}
 input,select{width:100%;padding:13px;margin:7px 0 15px;border-radius:8px;border:1px solid #555;background:#273449;color:white}
 label{color:#ddd}
-form{background:#1f2937;padding:18px;border-radius:12px}
-.turno{background:#1f2937;padding:14px;margin:10px 0;border-radius:10px;border-left:4px solid #c49b63}
+form{background:#1f2937;padding:18px;border-radius:12px;margin-bottom:20px}
+.turno{background:#1f2937;padding:14px;margin:10px 0;border-radius:10px;border-left:4px solid #c49b63;overflow-wrap:anywhere}
 nav{display:flex;gap:8px;margin:20px 0;flex-wrap:wrap}
-nav button{flex:1;min-width:90px}
+nav button{flex:1;min-width:75px}
 .seccion{display:none}
 .seccion.activa{display:block}
+.secundario{background:#374151;color:white;margin-top:8px}
+.ingreso{border-left-color:#4ade80}
+.gasto{border-left-color:#f87171}
 </style>
 </head>
 <body>
+
 <header>
 <h1>✂ Mi Peluquería Pro</h1>
 <p>Administrá tu peluquería de manera profesional</p>
 </header>
+
 <main>
 <h2>Panel principal</h2>
+
 <div class="cards">
-<div class="card"><small>Turnos registrados</small><strong id="total">0</strong></div>
-<div class="card"><small>Ingresos registrados</small><strong id="ingresos">$0</strong></div>
+<div class="card">
+<small>Turnos registrados</small>
+<strong id="total">0</strong>
+</div>
+<div class="card">
+<small>Ganancia del mes</small>
+<strong id="gananciaInicio">$0</strong>
+</div>
 </div>
 
 <nav>
 <button onclick="mostrar('inicio')">Inicio</button>
 <button onclick="mostrar('turnos')">Turnos</button>
 <button onclick="mostrar('clientes')">Clientes</button>
+<button onclick="mostrar('caja')">Caja</button>
 </nav>
 
 <section id="inicio" class="seccion activa">
@@ -58,8 +73,10 @@ nav button{flex:1;min-width:90px}
 <form id="formTurno">
 <label>Nombre del cliente</label>
 <input id="cliente" required placeholder="Nombre y apellido">
+
 <label>Teléfono</label>
 <input id="telefono" placeholder="Teléfono">
+
 <label>Servicio</label>
 <select id="servicio">
 <option>Corte de cabello</option>
@@ -68,14 +85,19 @@ nav button{flex:1;min-width:90px}
 <option>Coloración</option>
 <option>Otro servicio</option>
 </select>
+
 <label>Fecha</label>
 <input id="fecha" type="date" required>
+
 <label>Hora</label>
 <input id="hora" type="time" required>
+
 <label>Precio ($)</label>
 <input id="precio" type="number" min="0" required placeholder="Ej. 8000">
+
 <button type="submit">Guardar turno</button>
 </form>
+
 <h2>Todos los turnos</h2>
 <div id="lista"></div>
 </section>
@@ -84,13 +106,96 @@ nav button{flex:1;min-width:90px}
 <h2>Mis clientes</h2>
 <div id="listaClientes"></div>
 </section>
+
+<section id="caja" class="seccion">
+<h2>💰 Mi Caja</h2>
+<p>Controlá los ingresos, gastos y ganancias de tu peluquería.</p>
+
+<div class="cards">
+<div class="card">
+<small>Ingresos del día</small>
+<strong id="ingresoDia">$0</strong>
+</div>
+<div class="card">
+<small>Gastos del día</small>
+<strong id="gastoDia">$0</strong>
+</div>
+<div class="card">
+<small>Ingresos del mes</small>
+<strong id="ingresoMes">$0</strong>
+</div>
+<div class="card">
+<small>Gastos del mes</small>
+<strong id="gastoMes">$0</strong>
+</div>
+</div>
+
+<div class="card">
+<small>Ganancia neta del mes</small>
+<strong id="gananciaMes">$0</strong>
+</div>
+
+<h2>Registrar movimiento</h2>
+<form id="formCaja">
+<label>Tipo de movimiento</label>
+<select id="tipoMovimiento">
+<option value="ingreso">Ingreso</option>
+<option value="gasto">Gasto</option>
+</select>
+
+<label>Descripción</label>
+<input id="descripcion" required placeholder="Ej. Corte, tintura, productos">
+
+<label>Monto ($)</label>
+<input id="monto" type="number" min="1" required placeholder="Ej. 8000">
+
+<label>Fecha</label>
+<input id="fechaMovimiento" type="date" required>
+
+<button type="submit">Guardar movimiento</button>
+</form>
+
+<h2>Historial de caja</h2>
+<div id="listaCaja"></div>
+</section>
+
 </main>
+
 <script>
 let turnos=JSON.parse(localStorage.getItem('turnosPeluqueria')||'[]');
+let movimientos=JSON.parse(localStorage.getItem('cajaPeluqueria')||'[]');
+
+const dinero=n=>'$'+Number(n).toLocaleString('es-AR');
+
+function hoy(){
+const d=new Date();
+return d.getFullYear()+'-'+
+String(d.getMonth()+1).padStart(2,'0')+'-'+
+String(d.getDate()).padStart(2,'0');
+}
+
+function mesActual(){
+return hoy().slice(0,7);
+}
 
 function guardar(){
 localStorage.setItem('turnosPeluqueria',JSON.stringify(turnos));
 actualizar();
+}
+
+function guardarCaja(){
+localStorage.setItem('cajaPeluqueria',JSON.stringify(movimientos));
+actualizar();
+}
+
+function escapar(valor){
+return String(valor).replace(/[&<>"']/g,c=>({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+'"':'&quot;',
+"'":'&#39;'
+}[c]));
 }
 
 function mostrar(id){
@@ -101,6 +206,7 @@ actualizar();
 
 document.getElementById('formTurno').addEventListener('submit',function(e){
 e.preventDefault();
+
 turnos.push({
 cliente:document.getElementById('cliente').value,
 telefono:document.getElementById('telefono').value,
@@ -109,25 +215,27 @@ fecha:document.getElementById('fecha').value,
 hora:document.getElementById('hora').value,
 precio:Number(document.getElementById('precio').value)
 });
+
 guardar();
 this.reset();
 alert('¡Turno guardado correctamente!');
 });
 
-function actualizar(){
-document.getElementById('total').textContent=turnos.length;
-let suma=turnos.reduce((a,t)=>a+t.precio,0);
-document.getElementById('ingresos').textContent='$'+suma.toLocaleString('es-AR');
+document.getElementById('formCaja').addEventListener('submit',function(e){
+e.preventDefault();
 
-let html=turnos.slice().sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora))
-.map((t,i)=>`<div class="turno"><strong>${t.cliente}</strong><br>${t.servicio}<br>📅 ${t.fecha} - ${t.hora}<br>💰 $${t.precio.toLocaleString('es-AR')}<br><button onclick="eliminar(${turnos.indexOf(t)})">Eliminar</button></div>`).join('');
+movimientos.push({
+tipo:document.getElementById('tipoMovimiento').value,
+descripcion:document.getElementById('descripcion').value,
+monto:Number(document.getElementById('monto').value),
+fecha:document.getElementById('fechaMovimiento').value
+});
 
-document.getElementById('lista').innerHTML=html||'<p>No hay turnos registrados.</p>';
-document.getElementById('resumen').innerHTML=html||'<p>Todavía no hay turnos.</p>';
-
-let clientes=[...new Set(turnos.map(t=>t.cliente))];
-document.getElementById('listaClientes').innerHTML=clientes.map(c=>`<div class="turno">${c}</div>`).join('')||'<p>Todavía no hay clientes.</p>';
-}
+guardarCaja();
+this.reset();
+document.getElementById('fechaMovimiento').value=hoy();
+alert('¡Movimiento guardado correctamente!');
+});
 
 function eliminar(i){
 if(confirm('¿Querés eliminar este turno?')){
@@ -135,7 +243,95 @@ turnos.splice(i,1);
 guardar();
 }
 }
+
+function eliminarMovimiento(i){
+if(confirm('¿Querés eliminar este movimiento?')){
+movimientos.splice(i,1);
+guardarCaja();
+}
+}
+
+function actualizar(){
+document.getElementById('total').textContent=turnos.length;
+
+const dia=hoy();
+const mes=mesActual();
+
+const ingresosDia=movimientos
+.filter(m=>m.tipo==='ingreso'&&m.fecha===dia)
+.reduce((a,m)=>a+m.monto,0);
+
+const gastosDia=movimientos
+.filter(m=>m.tipo==='gasto'&&m.fecha===dia)
+.reduce((a,m)=>a+m.monto,0);
+
+const ingresosMes=movimientos
+.filter(m=>m.tipo==='ingreso'&&m.fecha.startsWith(mes))
+.reduce((a,m)=>a+m.monto,0);
+
+const gastosMes=movimientos
+.filter(m=>m.tipo==='gasto'&&m.fecha.startsWith(mes))
+.reduce((a,m)=>a+m.monto,0);
+
+const ganancia=ingresosMes-gastosMes;
+
+document.getElementById('ingresoDia').textContent=dinero(ingresosDia);
+document.getElementById('gastoDia').textContent=dinero(gastosDia);
+document.getElementById('ingresoMes').textContent=dinero(ingresosMes);
+document.getElementById('gastoMes').textContent=dinero(gastosMes);
+document.getElementById('gananciaMes').textContent=dinero(ganancia);
+document.getElementById('gananciaInicio').textContent=dinero(ganancia);
+
+const ordenados=turnos.slice().sort((a,b)=>
+(a.fecha+a.hora).localeCompare(b.fecha+b.hora)
+);
+
+const html=ordenados.map(t=>`
+<div class="turno">
+<strong>${escapar(t.cliente)}</strong><br>
+${escapar(t.servicio)}<br>
+📅 ${escapar(t.fecha)} - ${escapar(t.hora)}<br>
+💰 ${dinero(t.precio)}<br>
+<button class="secundario" onclick="eliminar(${turnos.indexOf(t)})">Eliminar turno</button>
+</div>
+`).join('');
+
+document.getElementById('lista').innerHTML=
+html||'<p>No hay turnos registrados.</p>';
+
+document.getElementById('resumen').innerHTML=
+html||'<p>Todavía no hay turnos.</p>';
+
+let clientes=[...new Set(turnos.map(t=>t.cliente))];
+
+document.getElementById('listaClientes').innerHTML=
+clientes.map(c=>`<div class="turno">${escapar(c)}</div>`).join('')
+||'<p>Todavía no hay clientes.</p>';
+
+const listaMovimientos=movimientos.slice().sort((a,b)=>
+b.fecha.localeCompare(a.fecha)
+);
+
+document.getElementById('listaCaja').innerHTML=
+listaMovimientos.map(m=>{
+const i=movimientos.indexOf(m);
+const esIngreso=m.tipo==='ingreso';
+
+return `
+<div class="turno ${esIngreso?'ingreso':'gasto'}">
+<strong>${esIngreso?'🟢 Ingreso':'🔴 Gasto'}</strong><br>
+${escapar(m.descripcion)}<br>
+📅 ${escapar(m.fecha)}<br>
+<strong>${dinero(m.monto)}</strong><br>
+<button class="secundario" onclick="eliminarMovimiento(${i})">Eliminar movimiento</button>
+</div>`;
+}).join('')||'<p>Todavía no hay movimientos en caja.</p>';
+}
+
+document.getElementById('fechaMovimiento').value=hoy();
+
 actualizar();
 </script>
+
 </body>
 </html>
