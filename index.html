@@ -372,6 +372,18 @@ informes.innerHTML = `
 <p>Ingresos: ${dinero(ingresosMes)}</p>
 <p>Gastos: ${dinero(gastosMes)}</p>
 <p>Ganancia: ${dinero(ganancia)}</p>
+
+<h3>📊 Comparación de ingresos y gastos</h3>
+
+<p>Ingresos de hoy: ${dinero(ingresosDia)}</p>
+<div style="background:#374151;height:18px;border-radius:10px">
+<div style="background:#22c55e;height:18px;width:${ingresosDia+gastosDia===0?0:ingresosDia/(ingresosDia+gastosDia)*100}%;border-radius:10px"></div>
+</div>
+
+<p>Gastos de hoy: ${dinero(gastosDia)}</p>
+<div style="background:#374151;height:18px;border-radius:10px">
+<div style="background:#ef4444;height:18px;width:${ingresosDia+gastosDia===0?0:gastosDia/(ingresosDia+gastosDia)*100}%;border-radius:10px"></div>
+</div>
 </div>
 `;
 }
