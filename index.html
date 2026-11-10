@@ -325,7 +325,55 @@ ${escapar(m.descripcion)}<br>
 <strong>${dinero(m.monto)}</strong><br>
 <button class="secundario" onclick="eliminarMovimiento(${i})">Eliminar movimiento</button>
 </div>`;
-}).join('')||'<p>Todavía no hay movimientos en caja.</p>';
+}).join('')||'<p>Todavía no hay movimientos en caja.</p>';// INFORMES DIARIOS, SEMANALES Y MENSUALES
+
+const fechaLocal = d =>
+  d.getFullYear() + '-' +
+  String(d.getMonth()+1).padStart(2,'0') + '-' +
+  String(d.getDate()).padStart(2,'0');
+
+const hoyFecha = new Date();
+const haceSeisDias = new Date();
+haceSeisDias.setDate(hoyFecha.getDate()-6);
+
+const inicioSemana = fechaLocal(haceSeisDias);
+
+const ingresosSemana = movimientos
+.filter(m=>m.tipo==='ingreso'&&m.fecha>=inicioSemana&&m.fecha<=dia)
+.reduce((a,m)=>a+m.monto,0);
+
+const gastosSemana = movimientos
+.filter(m=>m.tipo==='gasto'&&m.fecha>=inicioSemana&&m.fecha<=dia)
+.reduce((a,m)=>a+m.monto,0);
+
+let informes = document.getElementById('informes');
+
+if(!informes){
+  informes = document.createElement('div');
+  informes.id = 'informes';
+  document.body.appendChild(informes);
+}
+
+informes.innerHTML = `
+<div class="turno">
+<h2>📊 Informes del negocio</h2>
+
+<h3>📅 Hoy</h3>
+<p>Ingresos: ${dinero(ingresosDia)}</p>
+<p>Gastos: ${dinero(gastosDia)}</p>
+<p>Ganancia: ${dinero(ingresosDia-gastosDia)}</p>
+
+<h3>📆 Últimos 7 días</h3>
+<p>Ingresos: ${dinero(ingresosSemana)}</p>
+<p>Gastos: ${dinero(gastosSemana)}</p>
+<p>Ganancia: ${dinero(ingresosSemana-gastosSemana)}</p>
+
+<h3>🗓️ Este mes</h3>
+<p>Ingresos: ${dinero(ingresosMes)}</p>
+<p>Gastos: ${dinero(gastosMes)}</p>
+<p>Ganancia: ${dinero(ganancia)}</p>
+</div>
+`;
 }
 
 document.getElementById('fechaMovimiento').value=hoy();
