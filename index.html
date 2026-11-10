@@ -17,15 +17,21 @@ async function registrarUsuario() {
   const password = document.getElementById('passwordAcceso').value;
   const mensaje = document.getElementById('mensajeAcceso');
 
-  const { error } = await supabase.auth.signUp({
-    email: email,
-    password: password
-  });
+  try {
+    mensaje.textContent = 'Conectando...';
 
-  if (error) {
-    mensaje.textContent = error.message;
-  } else {
-    mensaje.textContent = 'Cuenta creada. Revisá tu correo para confirmar.';
+    const { error } = await supabase.auth.signUp({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      mensaje.textContent = error.message;
+    } else {
+      mensaje.textContent = 'Cuenta creada. Revisá tu correo.';
+    }
+  } catch (error) {
+    mensaje.textContent = 'Error: ' + error.message;
   }
 }
 
