@@ -12,6 +12,40 @@ const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
+async function registrarUsuario() {
+  const email = document.getElementById('emailAcceso').value;
+  const password = document.getElementById('passwordAcceso').value;
+  const mensaje = document.getElementById('mensajeAcceso');
+
+  const { error } = await supabase.auth.signUp({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    mensaje.textContent = error.message;
+  } else {
+    mensaje.textContent = 'Cuenta creada. Revisá tu correo para confirmar.';
+  }
+}
+
+async function entrarUsuario() {
+  const email = document.getElementById('emailAcceso').value;
+  const password = document.getElementById('passwordAcceso').value;
+  const mensaje = document.getElementById('mensajeAcceso');
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    mensaje.textContent = error.message;
+    return;
+  }
+
+  document.getElementById('pantallaInicio').style.display = 'none';
+}
 </script>
 <link rel="icon" type="image/png" href="b99634d7-e182-4125-834c-793597ecd769.png">
 <meta charset="UTF-8">
@@ -68,11 +102,26 @@ Mi Peluquería Pro
 Tu peluquería, más profesional.
 </p>
 
-<button onclick="
-document.getElementById('pantallaInicio').style.display='none';
-" style="width:220px;margin-top:25px;">
-ENTRAR
+<input id="emailAcceso" type="email" placeholder="Correo electrónico"
+style="width:220px;padding:12px;margin-top:20px;">
+
+<input id="passwordAcceso" 
+type="password" 
+placeholder="Contraseña"
+style="width:220px;padding:12px;margin-top:10px;">
+
+<input id="passwordAcceso" type="password" placeholder="Contraseña"
+style="width:220px;padding:12px;margin-top:10px;">
+
+<button onclick="registrarUsuario()" style="width:220px;margin-top:15px;">
+CREAR CUENTA
 </button>
+
+<button onclick="entrarUsuario()" style="width:220px;margin-top:10px;">
+INICIAR SESIÓN
+</button>
+
+<p id="mensajeAcceso" style="color:#e7c18b;"></p>
 
 <p style="color:#777;margin-top:40px;">
 © Mi Peluquería Pro
