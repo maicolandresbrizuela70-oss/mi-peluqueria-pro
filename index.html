@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Peluquería Pro</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#111827;color:white;font-family:Arial,sans-serif}
+header{background:#1f2937;padding:25px 20px;border-bottom:2px solid #c49b63}
+header h1{margin:0;color:#e7c18b;font-size:25px}
+header p{color:#aaa;margin-bottom:0}
+main{padding:20px;max-width:650px;margin:auto}
+h2{color:#e7c18b}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:#1f2937;padding:18px;border-radius:12px}
+.card small{color:#aaa}
+.card strong{display:block;font-size:25px;margin-top:10px}
+button{background:#c49b63;color:#111827;border:0;padding:13px;border-radius:8px;font-weight:bold;cursor:pointer}
+input,select{width:100%;padding:13px;margin:7px 0 15px;border-radius:8px;border:1px solid #555;background:#273449;color:white}
+label{color:#ddd}
+form{background:#1f2937;padding:18px;border-radius:12px}
+.turno{background:#1f2937;padding:14px;margin:10px 0;border-radius:10px;border-left:4px solid #c49b63}
+nav{display:flex;gap:8px;margin:20px 0;flex-wrap:wrap}
+nav button{flex:1;min-width:90px}
+.seccion{display:none}
+.seccion.activa{display:block}
+</style>
+</head>
+<body>
+<header>
+<h1>✂ Mi Peluquería Pro</h1>
+<p>Administrá tu peluquería de manera profesional</p>
+</header>
+<main>
+<h2>Panel principal</h2>
+<div class="cards">
+<div class="card"><small>Turnos registrados</small><strong id="total">0</strong></div>
+<div class="card"><small>Ingresos registrados</small><strong id="ingresos">$0</strong></div>
+</div>
+
+<nav>
+<button onclick="mostrar('inicio')">Inicio</button>
+<button onclick="mostrar('turnos')">Turnos</button>
+<button onclick="mostrar('clientes')">Clientes</button>
+</nav>
+
+<section id="inicio" class="seccion activa">
+<h2>Bienvenido</h2>
+<p>Tu negocio, organizado en un solo lugar.</p>
+<h3>Próximos turnos</h3>
+<div id="resumen"></div>
+</section>
+
+<section id="turnos" class="seccion">
+<h2>Registrar un turno</h2>
+<form id="formTurno">
+<label>Nombre del cliente</label>
+<input id="cliente" required placeholder="Nombre y apellido">
+<label>Teléfono</label>
+<input id="telefono" placeholder="Teléfono">
+<label>Servicio</label>
+<select id="servicio">
+<option>Corte de cabello</option>
+<option>Barba</option>
+<option>Corte y barba</option>
+<option>Coloración</option>
+<option>Otro servicio</option>
+</select>
+<label>Fecha</label>
+<input id="fecha" type="date" required>
+<label>Hora</label>
+<input id="hora" type="time" required>
+<label>Precio ($)</label>
+<input id="precio" type="number" min="0" required placeholder="Ej. 8000">
+<button type="submit">Guardar turno</button>
+</form>
+<h2>Todos los turnos</h2>
+<div id="lista"></div>
+</section>
+
+<section id="clientes" class="seccion">
+<h2>Mis clientes</h2>
+<div id="listaClientes"></div>
+</section>
+</main>
+<script>
+let turnos=JSON.parse(localStorage.getItem('turnosPeluqueria')||'[]');
+
+function guardar(){
+localStorage.setItem('turnosPeluqueria',JSON.stringify(turnos));
+actualizar();
+}
+
+function mostrar(id){
+document.querySelectorAll('.seccion').forEach(s=>s.classList.remove('activa'));
+document.getElementById(id).classList.add('activa');
+actualizar();
+}
+
+document.getElementById('formTurno').addEventListener('submit',function(e){
+e.preventDefault();
+turnos.push({
+cliente:document.getElementById('cliente').value,
+telefono:document.getElementById('telefono').value,
+servicio:document.getElementById('servicio').value,
+fecha:document.getElementById('fecha').value,
+hora:document.getElementById('hora').value,
+precio:Number(document.getElementById('precio').value)
+});
+guardar();
+this.reset();
+alert('¡Turno guardado correctamente!');
+});
+
+function actualizar(){
+document.getElementById('total').textContent=turnos.length;
+let suma=turnos.reduce((a,t)=>a+t.precio,0);
+document.getElementById('ingresos').textContent='$'+suma.toLocaleString('es-AR');
+
+let html=turnos.slice().sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora))
+.map((t,i)=>`<div class="turno"><strong>${t.cliente}</strong><br>${t.servicio}<br>📅 ${t.fecha} - ${t.hora}<br>💰 $${t.precio.toLocaleString('es-AR')}<br><button onclick="eliminar(${turnos.indexOf(t)})">Eliminar</button></div>`).join('');
+
+document.getElementById('lista').innerHTML=html||'<p>No hay turnos registrados.</p>';
+document.getElementById('resumen').innerHTML=html||'<p>Todavía no hay turnos.</p>';
+
+let clientes=[...new Set(turnos.map(t=>t.cliente))];
+document.getElementById('listaClientes').innerHTML=clientes.map(c=>`<div class="turno">${c}</div>`).join('')||'<p>Todavía no hay clientes.</p>';
+}
+
+function eliminar(i){
+if(confirm('¿Querés eliminar este turno?')){
+turnos.splice(i,1);
+guardar();
+}
+}
+actualizar();
+</script>
+</body>
+</html>
