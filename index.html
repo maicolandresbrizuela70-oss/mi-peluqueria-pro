@@ -13,6 +13,7 @@ const supabase = window.supabase.createClient(
   SUPABASE_ANON_KEY
 );
 console.log("SUPABASE CONECTADO");
+window.pruebaCodigo = "CARGADO";
 window.registrarUsuario = async () => {
   const email = document.getElementById('emailAcceso').value;
   const password = document.getElementById('passwordAcceso').value;
