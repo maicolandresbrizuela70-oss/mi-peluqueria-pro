@@ -3,25 +3,31 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const SUPABASE_URL = "https://xbeaxcduaohzaqecrfvh.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhiZWF4Y2R1YW9oemFxZWNyZnZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQyNzY5ODQsImV4cCI6MjEwOTg1Mjk4NH0.epwCtsIvE19Rrszkw6_kWyiR3mniqh8D74ITczJglFE";
+const SUPABASE_ANON_KEY = "PEGÁ_ACÁ_TU_CLAVE_ANON";
 
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
 );
-console.log("SUPABASE CONECTADO");
-window.pruebaCodigo = "CARGADO";
-window.registrarUsuario = async () => {
-  const email = document.getElementById('emailAcceso').value;
+
+window.registrarUsuario = async function() {
+  const email = document.getElementById('emailAcceso').value.trim();
   const password = document.getElementById('passwordAcceso').value;
   const mensaje = document.getElementById('mensajeAcceso');
 
-  try {
-    mensaje.textContent = 'Conectando...';
+  if (!email || !password) {
+    mensaje.textContent = 'Ingresá correo y contraseña.';
+    return;
+  }
 
+  mensaje.textContent = 'Conectando...';
+
+  try {
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password
@@ -37,24 +43,38 @@ window.registrarUsuario = async () => {
   }
 };
 
-async function entrarUsuario() {
-  const email = document.getElementById('emailAcceso').value;
+window.entrarUsuario = async function() {
+  const email = document.getElementById('emailAcceso').value.trim();
   const password = document.getElementById('passwordAcceso').value;
   const mensaje = document.getElementById('mensajeAcceso');
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password
-  });
-
-  if (error) {
-    mensaje.textContent = error.message;
+  if (!email || !password) {
+    mensaje.textContent = 'Ingresá correo y contraseña.';
     return;
   }
 
-  document.getElementById('pantallaInicio').style.display = 'none';
-}
+  mensaje.textContent = 'Ingresando...';
+
+  try {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      mensaje.textContent = error.message;
+      return;
+    }
+
+    document.getElementById('pantallaInicio').style.display = 'none';
+  } catch (error) {
+    mensaje.textContent = 'Error: ' + error.message;
+  }
+};
 </script>
+
+
+
 <link rel="icon" type="image/png" href="b99634d7-e182-4125-834c-793597ecd769.png">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
